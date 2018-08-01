@@ -210,19 +210,6 @@ public class WxMaServiceImpl implements WxMaService, RequestHttp<CloseableHttpCl
       return result;
     } catch (WxErrorException e) {
       WxError error = e.getError();
-      /*
-       * 发生以下情况时尝试刷新access_token
-       */
-      if (error.getErrorCode() == WxMaConstants.ErrorCode.ERR_40001
-        || error.getErrorCode() == WxMaConstants.ErrorCode.ERR_42001
-        || error.getErrorCode() == WxMaConstants.ErrorCode.ERR_40014) {
-        // 强制设置wxMpConfigStorage它的access token过期了，这样在下一次请求里就会刷新access token
-        this.getWxMaConfig().expireAccessToken();
-        if (this.getWxMaConfig().autoRefreshToken()) {
-          return this.execute(executor, uri, data);
-        }
-      }
-
       if (error.getErrorCode() != 0) {
         this.log.error("\n【请求地址】: {}\n【请求参数】：{}\n【错误信息】：{}", uriWithAccessToken, data, error);
         throw new WxErrorException(error, e);
