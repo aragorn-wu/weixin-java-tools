@@ -46,6 +46,8 @@ public class WxMaServiceImpl implements WxMaService, RequestHttp<CloseableHttpCl
   private HttpHost httpProxy;
   private WxMaConfig wxMaConfig;
 
+  private String accessToken;
+
   private WxMaMsgService kefuService = new WxMaMsgServiceImpl(this);
   private WxMaMediaService materialService = new WxMaMediaServiceImpl(this);
   private WxMaUserService userService = new WxMaUserServiceImpl(this);
@@ -73,20 +75,7 @@ public class WxMaServiceImpl implements WxMaService, RequestHttp<CloseableHttpCl
   @Override
   public void initHttp() {
     WxMaConfig configStorage = this.getWxMaConfig();
-    ApacheHttpClientBuilder apacheHttpClientBuilder = configStorage.getApacheHttpClientBuilder();
-    if (null == apacheHttpClientBuilder) {
-      apacheHttpClientBuilder = DefaultApacheHttpClientBuilder.get();
-    }
-
-    apacheHttpClientBuilder.httpProxyHost(configStorage.getHttpProxyHost())
-      .httpProxyPort(configStorage.getHttpProxyPort())
-      .httpProxyUsername(configStorage.getHttpProxyUsername())
-      .httpProxyPassword(configStorage.getHttpProxyPassword());
-
-    if (configStorage.getHttpProxyHost() != null && configStorage.getHttpProxyPort() > 0) {
-      this.httpProxy = new HttpHost(configStorage.getHttpProxyHost(), configStorage.getHttpProxyPort());
-    }
-
+    ApacheHttpClientBuilder apacheHttpClientBuilder = DefaultApacheHttpClientBuilder.get();
     this.httpClient = apacheHttpClientBuilder.build();
   }
 
@@ -211,7 +200,7 @@ public class WxMaServiceImpl implements WxMaService, RequestHttp<CloseableHttpCl
     if (uri.contains("access_token=")) {
       throw new IllegalArgumentException("uri参数中不允许有access_token: " + uri);
     }
-    String accessToken = getAccessToken(false);
+    //String accessToken = getAccessToken(false);
 
     String uriWithAccessToken = uri + (uri.contains("?") ? "&" : "?") + "access_token=" + accessToken;
 
@@ -289,5 +278,9 @@ public class WxMaServiceImpl implements WxMaService, RequestHttp<CloseableHttpCl
   @Override
   public WxMaTemplateService getTemplateService() {
     return this.templateService;
+  }
+
+  public void setAccessToken(String accessToken) {
+    this.accessToken = accessToken;
   }
 }
